@@ -1,0 +1,21 @@
+from shop.models import *
+from django.db.models import Min
+
+cat = Category.objects.create(name="Электроника")
+sup = Supplier.objects.create(company_name="TechSupply Inc.")
+prod = Product.objects.create(name="iPhone 14", category=cat, price=799.99, stock_quantity=50)
+ProductDetail.objects.create(product=prod, manufacturer="Apple Inc.", warranty_months=12)
+ProductSupplier.objects.create(product=prod, supplier=sup, purchase_price=650, delivery_days=7)
+tag_new = Tag.objects.create(name="новинка")
+ProductTag.objects.create(product=prod, tag=tag_new)
+
+cust = Customer.objects.create(first_name="Иван", last_name="Петров", email="ivan@example.com")
+order = Order.objects.create(customer=cust, total_amount=799.99, status=Order.Status.COMPLETED)
+OrderItem.objects.create(order=order, product=prod, quantity=1, unit_price=799.99)
+Review.objects.create(product=prod, customer=cust, rating=5, comment="Отлично")
+
+list(Product.objects.available().with_rating().values("name","avg_rating","review_count"))
+list(Product.objects.by_tag("новинка").values_list("name", flat=True))
+list(Product.objects.priced_between(100,900).values_list("name","price"))
+min_purchase = ProductSupplier.objects.filter(product=prod).aggregate(Min("purchase_price"))["purchase_price__min"]
+
